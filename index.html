@@ -1,0 +1,247 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>SEGOJMEIT · SNIS Laboratorio</title>
+<style>
+:root{--blue:#1259a6;--navy:#12345b;--red:#c93445;--light:#f4f8fc;--line:#d9e3ee;--green:#159447;--orange:#e99a20}
+*{box-sizing:border-box}body{margin:0;font-family:Arial,Helvetica,sans-serif;background:var(--light);color:#17324d}
+header{background:linear-gradient(115deg,#0d4d91,#1680c7);color:white;padding:18px 22px;display:flex;align-items:center;justify-content:space-between;gap:16px;position:sticky;top:0;z-index:5}
+.brand{font-weight:800;font-size:22px}.brand small{display:block;font-size:12px;font-weight:500;opacity:.9;margin-top:3px}
+nav{display:flex;gap:8px;flex-wrap:wrap}button,.btn{border:0;border-radius:9px;padding:10px 14px;cursor:pointer;font-weight:700}
+nav button{background:rgba(255,255,255,.15);color:white}nav button.active{background:white;color:var(--blue)}
+main{max-width:1400px;margin:20px auto;padding:0 16px}.tab{display:none}.tab.active{display:block}
+.card{background:white;border:1px solid var(--line);border-radius:14px;padding:18px;margin-bottom:16px;box-shadow:0 3px 14px rgba(18,52,91,.06)}
+h2{margin:0 0 14px;color:var(--navy)}h3{margin:4px 0 12px;color:var(--blue)}
+.grid{display:grid;grid-template-columns:repeat(4,minmax(150px,1fr));gap:12px}.grid3{display:grid;grid-template-columns:repeat(3,1fr);gap:12px}
+label{font-size:12px;font-weight:700;color:#47637d;display:block;margin-bottom:5px}
+input,select{width:100%;padding:10px;border:1px solid #cbd9e6;border-radius:8px;background:white;font-size:14px}
+.actions{display:flex;gap:8px;flex-wrap:wrap;margin-top:12px}.primary{background:var(--blue);color:white}.success{background:var(--green);color:white}.danger{background:var(--red);color:white}.secondary{background:#e9f0f7;color:#244765}
+.kpis{display:grid;grid-template-columns:repeat(4,1fr);gap:12px}.kpi{padding:16px;border-radius:12px;background:#eef6ff;border:1px solid #d6e9fb}.kpi b{display:block;font-size:27px;color:var(--blue);margin-top:4px}
+.order{border:1px solid var(--line);border-radius:12px;padding:14px;margin-top:14px;background:#fbfdff}.order-head{display:flex;justify-content:space-between;gap:10px;align-items:center;flex-wrap:wrap}
+.tests{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-top:10px}.test{border:1px solid #d7e3ef;border-radius:8px;padding:9px;background:white;display:flex;gap:8px;align-items:center;font-size:13px}
+table{width:100%;border-collapse:collapse;font-size:13px}th,td{border-bottom:1px solid #e3eaf1;padding:9px;text-align:left}th{background:#edf5fc;color:#244765}
+.badge{display:inline-block;padding:4px 8px;border-radius:99px;background:#e8f3ff;color:var(--blue);font-size:11px;font-weight:700}
+.right{text-align:right}.muted{color:#6b8195;font-size:12px}.empty{padding:25px;text-align:center;color:#71879a}
+@media(max-width:900px){.grid,.grid3,.kpis{grid-template-columns:repeat(2,1fr)}.tests{grid-template-columns:repeat(2,1fr)}}@media(max-width:560px){.grid,.grid3,.kpis,.tests{grid-template-columns:1fr}header{position:static}}
+@media print{header,nav,.no-print{display:none!important}body{background:white}.card{box-shadow:none}.tab{display:none}.tab.printable{display:block}}
+</style>
+</head>
+<body>
+<header>
+<div class="brand">♥ SEGOJMEIT <small>Clínica Virgen de Guadalupe · Laboratorio y Transfusión</small></div>
+<nav>
+<button class="active" onclick="showTab('snis',this)">📋 SNIS Laboratorio</button>
+<button onclick="showTab('hist',this)">📊 Registro diario</button>
+<button onclick="showTab('catalogo',this)">🧪 Catálogo y precios</button>
+<button onclick="showTab('cot',this)">🛒 Cotización</button>
+</nav>
+</header>
+<main>
+
+<section id="snis" class="tab active">
+<div class="card">
+<h2>Registro diario SNIS · Laboratorio</h2>
+<div class="grid">
+<div><label>Fecha</label><input id="fecha" type="date"></div>
+<div><label>Edad</label><input id="edad" type="number" min="0" max="120" placeholder="Ej. 42"></div>
+<div><label>Sexo</label><select id="sexo"><option value="">Seleccionar</option><option>Femenino</option><option>Masculino</option></select></div>
+<div><label>Tipo de seguro</label><select id="seguro"><option>Syncronia</option></select></div>
+</div>
+<div class="grid3" style="margin-top:12px">
+<div><label>Servicio solicitante</label><input id="servicio" placeholder="Ej. Medicina Interna"></div>
+<div><label>N.º de orden médica</label><input id="orden" placeholder="Orden / correlativo"></div>
+<div><label>Observación</label><input id="obs" placeholder="Opcional"></div>
+</div>
+</div>
+
+<div class="card">
+<h3>Pruebas de la orden médica</h3>
+<p class="muted">Selecciona todas las pruebas solicitadas. Se contabilizan automáticamente por grupo SNIS.</p>
+<div id="selector"></div>
+<div class="actions">
+<button class="primary" onclick="guardarOrden()">💾 Registrar orden</button>
+<button class="secondary" onclick="limpiarOrden()">↺ Limpiar</button>
+</div>
+</div>
+</section>
+
+<section id="hist" class="tab">
+<div class="card">
+<h2>Registro diario y consolidado</h2>
+<div class="grid3">
+<div><label>Filtrar fecha</label><input id="filtroFecha" type="date" oninput="renderHist()"></div>
+<div><label>Filtrar sexo</label><select id="filtroSexo" onchange="renderHist()"><option value="">Todos</option><option>Femenino</option><option>Masculino</option></select></div>
+<div><label>Filtrar grupo</label><select id="filtroGrupo" onchange="renderHist()"><option value="">Todos</option></select></div>
+</div>
+<div class="kpis" style="margin-top:14px">
+<div class="kpi">Órdenes<b id="kOrdenes">0</b></div>
+<div class="kpi">Pruebas<b id="kPruebas">0</b></div>
+<div class="kpi">Hematología<b id="kHema">0</b></div>
+<div class="kpi">Química clínica<b id="kQuim">0</b></div>
+</div>
+<div class="actions no-print">
+<button class="primary" onclick="window.print()">🖨️ Imprimir SNIS</button>
+<button class="success" onclick="exportCSV()">⬇️ Exportar CSV</button>
+<button class="danger" onclick="borrarTodo()">🗑️ Borrar registros</button>
+</div>
+</div>
+<div class="card">
+<table><thead><tr><th>Fecha</th><th>Edad</th><th>Sexo</th><th>Seguro</th><th>Servicio</th><th>Orden</th><th>Grupo</th><th>Pruebas</th><th class="no-print">Acción</th></tr></thead>
+<tbody id="tabla"></tbody></table>
+</div>
+</section>
+
+<section id="catalogo" class="tab">
+<div class="card">
+<h2>Catálogo de análisis y precios por seguro</h2>
+<p class="muted">Los precios son editables. La aplicación permite crear tarifas diferentes para cada seguro sin modificar el registro SNIS.</p>
+<div class="grid3">
+<div><label>Seguro</label><input id="nuevoSeguro" placeholder="Ej. Syncronia"></div>
+<div><label>Nombre del análisis</label><input id="nuevoNombre" placeholder="Ej. Ferritina"></div>
+<div><label>Grupo SNIS</label><select id="nuevoGrupo"></select></div>
+</div>
+<div class="grid3" style="margin-top:12px">
+<div><label>Precio Bs</label><input id="nuevoPrecio" type="number" step="0.01" min="0"></div>
+<div><label>Unidad / nota</label><input id="nuevoUnidad" placeholder="Opcional"></div>
+<div class="actions" style="align-items:end"><button class="primary" onclick="agregarAnalisis()">➕ Agregar / actualizar</button></div>
+</div>
+</div>
+<div class="card">
+<table><thead><tr><th>Seguro</th><th>Grupo</th><th>Análisis</th><th>Precio Bs</th><th>Unidad</th><th>Acción</th></tr></thead><tbody id="tablaCatalogo"></tbody></table>
+</div>
+</section>
+
+<section id="cot" class="tab">
+<div class="card">
+<h2>Cotización</h2>
+<div class="grid3">
+<div><label>Seguro</label><select id="cotSeguro" onchange="renderCotCatalogo()"></select></div>
+<div><label>Paciente</label><input id="cotPaciente" placeholder="Nombre del paciente"></div>
+<div><label>Cargo atención a domicilio</label><input id="domicilio" type="number" value="40" step="0.01"></div>
+</div>
+<div id="cotCatalogo" class="tests" style="margin-top:14px"></div>
+<div class="right" style="margin-top:15px;font-size:20px"><b>Total Bs <span id="totalCot">0.00</span></b></div>
+<div class="actions"><button class="success" onclick="enviarWhatsApp()">📲 Enviar por WhatsApp</button><button class="primary" onclick="window.print()">🖨️ Imprimir</button></div>
+</div>
+</section>
+</main>
+
+<script>
+const grupos=["Hematología","Química clínica","Inmunología","Microbiología","Uroanálisis","Coagulación","Hormonas","Marcadores tumorales","Serología","Gases y electrolitos","Otros"];
+const base=[
+["Syncronia","Hemograma completo automatizado","Hematología",45.50,""],
+["Syncronia","Glicemia / glucosa","Química clínica",32.50,""],
+["Syncronia","Creatinina","Química clínica",32.50,""],
+["Syncronia","TSH","Hormonas",100.00,""],
+["Syncronia","HbA1c","Química clínica",104.00,""],
+["Syncronia","Gasometría arterial","Gases y electrolitos",300.00,""],
+["Syncronia","Perfil lipídico","Química clínica",0,""],
+["Syncronia","Urea","Química clínica",0,""],
+["Syncronia","Ácido úrico","Química clínica",0,""],
+["Syncronia","Colesterol total","Química clínica",0,""],
+["Syncronia","Triglicéridos","Química clínica",0,""],
+["Syncronia","HDL colesterol","Química clínica",0,""],
+["Syncronia","LDL colesterol","Química clínica",0,""],
+["Syncronia","Proteínas totales","Química clínica",0,""],
+["Syncronia","Albúmina","Química clínica",0,""],
+["Syncronia","Bilirrubina total","Química clínica",0,""],
+["Syncronia","Bilirrubina directa","Química clínica",0,""],
+["Syncronia","Bilirrubina indirecta","Química clínica",0,""],
+["Syncronia","AST / TGO","Química clínica",0,""],
+["Syncronia","ALT / TGP","Química clínica",0,""],
+["Syncronia","Fosfatasa alcalina","Química clínica",0,""],
+["Syncronia","GGT","Química clínica",0,""],
+["Syncronia","Calcio","Química clínica",0,""],
+["Syncronia","Magnesio","Química clínica",0,""],
+["Syncronia","Sodio","Gases y electrolitos",0,""],
+["Syncronia","Potasio","Gases y electrolitos",0,""],
+["Syncronia","Cloro","Gases y electrolitos",0,""],
+["Syncronia","PCR","Inmunología",0,""],
+["Syncronia","Complemento C3","Inmunología",0,""],
+["Syncronia","Complemento C4","Inmunología",0,""],
+["Syncronia","Ferritina","Inmunología",0,""],
+["Syncronia","Dímero D","Coagulación",0,""],
+["Syncronia","TP / INR","Coagulación",0,""],
+["Syncronia","TTPa","Coagulación",0,""],
+["Syncronia","Examen general de orina","Uroanálisis",0,""],
+["Syncronia","Urocultivo + antibiograma","Microbiología",0,""],
+["Syncronia","Hepatitis A rápida","Serología",0,""],
+["Syncronia","Hepatitis B","Serología",0,""],
+["Syncronia","Hepatitis C","Serología",0,""],
+["Syncronia","VIH","Serología",0,""],
+["Syncronia","RPR","Serología",0,""],
+["Syncronia","Chagas","Serología",0,""],
+["Syncronia","NT-proBNP","Otros",0,""],
+["Syncronia","Amilasa","Química clínica",0,""],
+["Syncronia","Lipasa","Química clínica",0,""],
+["Syncronia","Leptospirosis","Serología",0,""],
+["Syncronia","PCR tuberculosis","Microbiología",0,""]
+];
+let catalog=JSON.parse(localStorage.getItem("sego_catalogo")||"null")||base.map((x,i)=>({id:i+1,seguro:x[0],nombre:x[1],grupo:x[2],precio:x[3],unidad:x[4]}));
+let orders=JSON.parse(localStorage.getItem("sego_snis")||"[]");
+let selected=new Set(), cotSelected=new Set();
+
+function save(){localStorage.setItem("sego_catalogo",JSON.stringify(catalog));localStorage.setItem("sego_snis",JSON.stringify(orders))}
+function showTab(id,btn){document.querySelectorAll(".tab").forEach(x=>x.classList.remove("active"));document.getElementById(id).classList.add("active");document.querySelectorAll("nav button").forEach(x=>x.classList.remove("active"));btn.classList.add("active");if(id==="hist")renderHist();if(id==="catalogo")renderCatalogo();if(id==="cot"){renderCotSeguro();renderCotCatalogo()}}
+function init(){
+document.getElementById("fecha").value=new Date().toISOString().slice(0,10);
+grupos.forEach(g=>{document.getElementById("nuevoGrupo").innerHTML+=`<option>${g}</option>`;document.getElementById("filtroGrupo").innerHTML+=`<option>${g}</option>`});
+renderSelector();renderCatalogo();renderCotSeguro();renderCotCatalogo();
+}
+function renderSelector(){
+const box=document.getElementById("selector");box.innerHTML="";
+grupos.forEach(g=>{
+ const arr=catalog.filter(x=>x.grupo===g);if(!arr.length)return;
+ box.innerHTML+=`<div class="order"><div class="order-head"><b>${g}</b><span class="badge">${arr.length} análisis</span></div><div class="tests">${arr.map(x=>`<label class="test"><input type="checkbox" value="${x.id}" ${selected.has(x.id)?"checked":""} onchange="toggleTest(${x.id},this.checked)"> ${x.nombre}</label>`).join("")}</div></div>`;
+});
+}
+function toggleTest(id,on){on?selected.add(id):selected.delete(id)}
+function limpiarOrden(){selected.clear();["edad","servicio","orden","obs"].forEach(id=>document.getElementById(id).value="");renderSelector()}
+function guardarOrden(){
+if(!document.getElementById("edad").value||!document.getElementById("sexo").value||!selected.size){alert("Completa edad, sexo y al menos una prueba.");return}
+const tests=catalog.filter(x=>selected.has(x.id));
+orders.push({id:Date.now(),fecha:fecha.value,edad:edad.value,sexo:sexo.value,seguro:seguro.value,servicio:servicio.value||"",orden:orden.value||"",obs:obs.value||"",tests:tests.map(x=>({id:x.id,nombre:x.nombre,grupo:x.grupo}))});
+save();alert("Orden registrada en SNIS.");limpiarOrden();renderHist()
+}
+function renderHist(){
+const ff=filtroFecha.value, fs=filtroSexo.value, fg=filtroGrupo.value;
+let rows=orders.filter(o=>(!ff||o.fecha===ff)&&(!fs||o.sexo===fs)&&(!fg||o.tests.some(t=>t.grupo===fg)));
+let pruebas=rows.reduce((n,o)=>n+o.tests.length,0), he=rows.reduce((n,o)=>n+o.tests.filter(t=>t.grupo==="Hematología").length,0), qu=rows.reduce((n,o)=>n+o.tests.filter(t=>t.grupo==="Química clínica").length,0);
+kOrdenes.textContent=rows.length;kPruebas.textContent=pruebas;kHema.textContent=he;kQuim.textContent=qu;
+tabla.innerHTML=rows.length?rows.map(o=>`<tr><td>${o.fecha}</td><td>${o.edad}</td><td>${o.sexo}</td><td>${o.seguro}</td><td>${o.servicio}</td><td>${o.orden}</td><td>${[...new Set(o.tests.map(t=>t.grupo))].join(", ")}</td><td>${o.tests.map(t=>t.nombre).join(", ")}</td><td class="no-print"><button class="danger" onclick="eliminarOrden(${o.id})">Eliminar</button></td></tr>`).join(""):`<tr><td colspan="9" class="empty">No hay registros con esos filtros.</td></tr>`;
+}
+function eliminarOrden(id){orders=orders.filter(x=>x.id!==id);save();renderHist()}
+function borrarTodo(){if(confirm("¿Borrar todos los registros SNIS?")){orders=[];save();renderHist()}}
+function renderCatalogo(){
+tablaCatalogo.innerHTML=catalog.map(x=>`<tr><td>${x.seguro}</td><td>${x.grupo}</td><td>${x.nombre}</td><td><input style="max-width:110px" type="number" step=".01" value="${x.precio}" onchange="cambiarPrecio(${x.id},this.value)"></td><td>${x.unidad||""}</td><td><button class="danger" onclick="eliminarAnalisis(${x.id})">Eliminar</button></td></tr>`).join("");
+}
+function cambiarPrecio(id,v){let x=catalog.find(a=>a.id===id);x.precio=Number(v)||0;save();renderCotCatalogo()}
+function agregarAnalisis(){
+let s=nuevoSeguro.value.trim()||"Syncronia",n=nuevoNombre.value.trim(),g=nuevoGrupo.value,p=Number(nuevoPrecio.value)||0,u=nuevoUnidad.value.trim();
+if(!n){alert("Escribe el nombre del análisis.");return}
+let x=catalog.find(a=>a.seguro===s&&a.nombre.toLowerCase()===n.toLowerCase());
+if(x){x.grupo=g;x.precio=p;x.unidad=u}else catalog.push({id:Date.now(),seguro:s,nombre:n,grupo:g,precio:p,unidad:u});
+save();renderSelector();renderCatalogo();renderCotSeguro();renderCotCatalogo();nuevoNombre.value="";nuevoPrecio.value="";nuevoUnidad.value=""
+}
+function eliminarAnalisis(id){catalog=catalog.filter(x=>x.id!==id);selected.delete(id);cotSelected.delete(id);save();renderSelector();renderCatalogo();renderCotCatalogo()}
+function renderCotSeguro(){
+let seguros=[...new Set(catalog.map(x=>x.seguro))];cotSeguro.innerHTML=seguros.map(s=>`<option>${s}</option>`).join("");
+}
+function renderCotCatalogo(){
+let s=cotSeguro.value;let arr=catalog.filter(x=>x.seguro===s);cotCatalogo.innerHTML=arr.map(x=>`<label class="test"><input type="checkbox" value="${x.id}" ${cotSelected.has(x.id)?"checked":""} onchange="toggleCot(${x.id},this.checked)"> ${x.nombre} · Bs ${Number(x.precio).toFixed(2)}</label>`).join("");calcCot()
+}
+function toggleCot(id,on){on?cotSelected.add(id):cotSelected.delete(id);calcCot()}
+function calcCot(){let total=catalog.filter(x=>cotSelected.has(x.id)).reduce((s,x)=>s+Number(x.precio||0),0);let dom=Number(domicilio.value||0);totalCot.textContent=(total+dom).toFixed(2)}
+domicilio.addEventListener("input",calcCot)
+function enviarWhatsApp(){let items=catalog.filter(x=>cotSelected.has(x.id));let p=cotPaciente.value||"Paciente";let total=items.reduce((s,x)=>s+Number(x.precio||0),0)+Number(domicilio.value||0);let msg=`Cotización · Clínica Virgen de Guadalupe / SEGOJMEIT%0A${p}%0A${items.map(x=>`• ${x.nombre}: Bs ${Number(x.precio).toFixed(2)}`).join("%0A")}%0A• Atención a domicilio: Bs ${Number(domicilio.value||0).toFixed(2)}%0ATotal: Bs ${total.toFixed(2)}`;window.open("https://wa.me/?text="+msg,"_blank")}
+function exportCSV(){
+let rows=[["Fecha","Edad","Sexo","Seguro","Servicio","Orden","Grupo","Prueba"]];
+orders.forEach(o=>o.tests.forEach(t=>rows.push([o.fecha,o.edad,o.sexo,o.seguro,o.servicio,o.orden,t.grupo,t.nombre])));
+let csv=rows.map(r=>r.map(v=>`"${String(v).replaceAll('"','""')}"`).join(";")).join("\\n");
+let a=document.createElement("a");a.href=URL.createObjectURL(new Blob(["\\ufeff"+csv],{type:"text/csv;charset=utf-8"}));a.download="SNIS_Laboratorio.csv";a.click()
+}
+init();
+</script>
+</body></html>
